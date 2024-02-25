@@ -49,6 +49,8 @@ def fda_step_fn(inputs, multi_worker_model, per_replica_batch_size):
         experimental_aggregate_gradients=False  # for tf 2.4.2  , skip_gradients_aggregation=True for tf 2.11.0
     )
 
+    return loss
+
 
 def fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_size):
 
@@ -57,3 +59,4 @@ def fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_siz
     return strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_losses, axis=None)
 
 
+# TODO: Can completely remove returning the loss and directly use ln:57 in the naive training loop as is.
