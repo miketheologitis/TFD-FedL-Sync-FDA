@@ -42,6 +42,7 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
     epoch_metrics = []
 
     w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)  # tf.Tensor vector w/ shape=(d,)
+    print(f"here ----> {tf.reduce_mean(w_t0)}")
 
     epoch, num_total_rounds, num_total_steps = 0, 0, 0
 
@@ -63,7 +64,7 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
                 update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
 
                 w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
-                print(f"Sync: {num_total_rounds} w_t0 average: {tf.reduce_mean(w_t0)}")
+                #print(f"Sync: {num_total_rounds} w_t0 average: {tf.reduce_mean(w_t0)}")
                 num_total_rounds += 1
 
         # TODO: epoch ends, find accuracy
