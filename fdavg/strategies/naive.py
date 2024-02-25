@@ -36,25 +36,7 @@ def naive_rtc(multi_worker_model, w_t0, theta):
     return avg_drift_sq > theta
 
 
-def naive_rtc2(multi_worker_model, w_t0, theta):
-    """
-    Round Terminating Condition for NaiveFDA
-
-    This function computes the drift of the model's trainable variables from a baseline state, averages the squared
-    drift across all replicas, and checks if this average exceeds a specified threshold. The operation ensures a
-    unified decision across all replicas, returning a single boolean value that is consistent across the distributed
-    context
-
-    Args:
-        multi_worker_model (tf.keras.Model): The distributed model being trained.
-        w_t0 (tf.Tensor): The last round's model.
-        theta (float): The variance threshold.
-
-    Returns:
-        bool: A single boolean value, identical across all replicas, indicating whether round should terminate (True)
-        or not (False).
-    """
-
+def test_all_reduce(multi_worker_model, w_t0, theta):
     drift = trainable_vars_as_vector(multi_worker_model.trainable_variables) - w_t0
 
     drift_sq = tf.reduce_sum(tf.square(drift))
@@ -89,7 +71,8 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
             num_total_steps += 1
 
             if naive_rtc(multi_worker_model, w_t0, theta):
-                x = naive_rtc2(multi_worker_model, w_t0, theta)
+                x = strategy.run(test_all_reduce, args=(multi_worker_model, w_t0, theta))
+                #x = test_all_reduce(multi_worker_model, w_t0, theta)
                 print(f"Sync: {num_total_rounds} PLZ ----> {tf.reduce_mean(x)}")
 
                 # Synchronization needed - Round terminates
