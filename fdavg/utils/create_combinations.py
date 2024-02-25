@@ -28,7 +28,7 @@ def create_combinations(args):
     params = {
         "ds_name": args.ds_name,
         "nn_name": args.nn,
-        "strat_name": args.fda,
+        "strat_name": args.strat_name,
         "per_replica_batch_size": args.b,
         "theta": args.th,
         "num_replicas": args.num_replicas
