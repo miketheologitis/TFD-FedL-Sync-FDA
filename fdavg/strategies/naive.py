@@ -58,7 +58,7 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
             num_total_steps += 1
 
             if naive_rtc(multi_worker_model, w_t0, theta):
-                print(f"Synchronization Needed in Step {num_epoch_steps}")
+                print(f"Synchronization Needed in Step {num_total_steps}")
                 # Synchronization needed - Round terminates
                 synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
                 update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
