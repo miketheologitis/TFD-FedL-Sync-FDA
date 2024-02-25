@@ -28,7 +28,7 @@ def ksi_unit(w_t0, w_tminus1):
     return tf.divide(ksi, tf.norm(ksi))
 
 
-def linear_rtc(multi_worker_model, w_t0, w_tminus1, theta):
+def linear_var_approx(multi_worker_model, w_t0, w_tminus1):
     """
     Round Terminating Condition for NaiveFDA
 
@@ -61,7 +61,7 @@ def linear_rtc(multi_worker_model, w_t0, w_tminus1, theta):
         tf.distribute.ReduceOp.MEAN, [drift_sq, ksi_dot_drift]
     )
 
-    return avg_drift_sq - avg_ksi_dot_drift**2 > theta
+    return avg_drift_sq - avg_ksi_dot_drift**2
 
 
 def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset,
@@ -81,11 +81,16 @@ def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset,
         num_epoch_steps = 0
 
         while num_epoch_steps <= num_steps_per_epoch:
+
+            # Train Step
             strategy.run(fda_step_fn, args=(next(iterator), multi_worker_model, per_replica_batch_size))
             num_epoch_steps += 1
             num_total_steps += 1
 
-            if linear_rtc(multi_worker_model, w_t0, w_tminus1, theta):
+            # Estimate Variance
+            est_var = strategy.run(linear_var_approx, args=(multi_worker_model, w_t0, w_tminus1))
+
+            if est_var > theta:
                 # Synchronization needed - Round terminates
                 synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
                 update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)

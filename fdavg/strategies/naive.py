@@ -6,7 +6,7 @@ from fdavg.utils.distributed_ops import aggregate_models
 from fdavg.metrics.metrics import EpochMetrics
 
 
-def naive_var_approx(multi_worker_model, w_t0, theta):
+def naive_var_approx(multi_worker_model, w_t0):
     """
     Round Terminating Condition for NaiveFDA
 
@@ -54,12 +54,16 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
 
         while num_epoch_steps <= num_steps_per_epoch:
 
+            # Train Step
             strategy.run(fda_step_fn, args=(next(iterator), multi_worker_model, per_replica_batch_size))
             num_epoch_steps += 1
             num_total_steps += 1
 
-            est_var = strategy.run(naive_var_approx, args=(multi_worker_model, w_t0, theta))
-            print(f"Step: {num_total_steps} here ----> {est_var}")
+            # Estimate variance
+            est_var = strategy.run(naive_var_approx, args=(multi_worker_model, w_t0))
+
+            print(strategy.experimental_local_results(strategy.run(naive_var_approx, args=(multi_worker_model, w_t0))))
+
             if est_var > theta:
                 # Synchronization needed - Round terminates
                 synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)

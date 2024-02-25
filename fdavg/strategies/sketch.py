@@ -128,7 +128,7 @@ class AmsSketch:
         return np.median(norm_sq_rows)
 
 
-def sketch_rtc(multi_worker_model, w_t0, ams_sketch, epsilon, theta):
+def sketch_var_approx(multi_worker_model, w_t0, ams_sketch, epsilon):
     """
     Round Terminating Condition for NaiveFDA
 
@@ -159,7 +159,7 @@ def sketch_rtc(multi_worker_model, w_t0, ams_sketch, epsilon, theta):
         tf.distribute.ReduceOp.MEAN, [drift_sq, sketch]
     )
 
-    return avg_drift_sq - (1. / (1. + epsilon) * AmsSketch.estimate_euc_norm_squared(avg_sketch)) > theta
+    return avg_drift_sq - (1. / (1. + epsilon) * AmsSketch.estimate_euc_norm_squared(avg_sketch))
 
 
 def sketch_training_loop(strategy, multi_worker_model, multi_worker_dataset,
@@ -178,11 +178,16 @@ def sketch_training_loop(strategy, multi_worker_model, multi_worker_dataset,
         num_epoch_steps = 0
 
         while num_epoch_steps <= num_steps_per_epoch:
+
+            # Train Step
             strategy.run(fda_step_fn, args=(next(iterator), multi_worker_model, per_replica_batch_size))
             num_epoch_steps += 1
             num_total_steps += 1
 
-            if sketch_rtc(multi_worker_model, w_t0, ams_sketch, epsilon, theta):
+            # Estimate Variance
+            est_var = strategy.run(sketch_var_approx, args=(multi_worker_model, w_t0, ams_sketch, epsilon))
+
+            if est_var > theta:
                 # Synchronization needed - Round terminates
                 synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
                 update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
