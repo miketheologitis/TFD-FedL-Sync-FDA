@@ -28,7 +28,7 @@ Attributes:
 """
 # Define a named tuple to store epoch-specific metrics in federated learning.
 EpochMetrics = namedtuple(
-    "EpochMetrics", ["epoch", "total_rounds", "total_fda_steps", "time_sec", "accuracy"]
+    "EpochMetrics", ["epoch", "total_rounds", "total_fda_steps", "epoch_duration_sec", "accuracy"]
 )
 
 # Extend the EpochMetrics and RoundMetrics namedtuples to include TestId.

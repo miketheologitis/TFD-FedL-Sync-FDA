@@ -1,8 +1,9 @@
 import time
 import tensorflow as tf
-from fdavg.strategies.fda import fda_train_step
+from fdavg.strategies.fda import fda_step_fn
 from fdavg.models.miscellaneous import trainable_vars_as_vector, update_distributed_model_vars_from_tensors
 from fdavg.utils.distributed_ops import aggregate_models
+from fdavg.metrics.metrics import EpochMetrics
 
 
 def ksi_unit(w_t0, w_tminus1):
@@ -68,19 +69,21 @@ def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset,
 
     epoch_metrics = []
 
-    epoch = 0
-
     w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)  # tf.Tensor vector w/ shape=(d,)
     w_tminus1 = w_t0  # tf.Tensor vector w/ shape=(d,)
 
+    epoch, num_total_rounds, num_total_steps = 0, 0, 0
+
     while epoch <= num_epochs:
+        start_epoch_time = time.time()
+
         iterator = iter(multi_worker_dataset)
-        total_loss, num_epoch_rounds, num_epoch_steps = 0.0, 0, 0
+        num_epoch_steps = 0
 
         while num_epoch_steps <= num_steps_per_epoch:
-            loss = fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_size)
-            total_loss += loss
+            strategy.run(fda_step_fn, args=(next(iterator), multi_worker_model, per_replica_batch_size))
             num_epoch_steps += 1
+            num_total_steps += 1
 
             if linear_rtc(multi_worker_model, w_t0, w_tminus1, theta):
                 # Synchronization needed - Round terminates
@@ -89,13 +92,16 @@ def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset,
 
                 w_tminus1 = w_t0
                 w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
-                num_epoch_rounds += 1
+                num_total_rounds += 1
 
         # TODO: epoch ends, find accuracy
-
-        train_loss = total_loss / num_epoch_steps
         epoch += 1
 
-        print(f"Epoch: {epoch}, train_loss:{train_loss}")
+        # ---- METRICS ----
+        epoch_duration_sec = time.time() - start_epoch_time
+        e_met = EpochMetrics(epoch, num_total_rounds, num_total_steps, epoch_duration_sec, 0.0)
+        epoch_metrics.append(e_met)
+        print(e_met)
+        # ---- METRICS ----
 
-    return step_metrics
+    return epoch_metrics

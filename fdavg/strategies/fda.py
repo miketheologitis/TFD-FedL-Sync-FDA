@@ -3,16 +3,16 @@ import tensorflow as tf
 
 def fda_step_fn(inputs, multi_worker_model, per_replica_batch_size):
     """
-     Executes a single training step on a batch of data for one replica in a custom distributed training setup,
-    applying gradients locally without aggregating them across replicas. This is in contrast to standard distributed
-    training practices where gradients are aggregated across all replicas before being applied.
+    Executes a single training step on a batch of data for one replica in a custom distributed training setup,
+    applying gradients locally without aggregating them across replicas. This approach is different from standard
+    distributed training practices, where gradients are aggregated across all replicas before being applied.
 
     This function computes the loss and gradients for a batch of data (`inputs`) processed by one replica of
     a distributed model (`multi_worker_model`). Unlike typical distributed training that uses the `global_batch_size`
     for loss averaging across all replicas, here the loss is averaged using `per_replica_batch_size`, reflecting
     the data subset processed by this replica. This adjustment is crucial because gradients are applied locally
-    to each replica without being aggregated globally, necessitating subsequent manual synchronization and aggregation
-    of model updates across replicas.
+    to each replica without being aggregated globally. This necessitates subsequent manual synchronization and
+    aggregation of model updates across replicas to maintain consistency and ensure effective learning.
 
     Args:
         inputs (tuple): A tuple containing two elements:
@@ -53,15 +53,9 @@ def fda_step_fn(inputs, multi_worker_model, per_replica_batch_size):
 """
     return loss
 
-
 def fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_size):
 
     per_replica_losses = strategy.run(fda_step_fn, args=(next(iterator), multi_worker_model, per_replica_batch_size))
 
     return strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_losses, axis=None)
 """
-
-def fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_size):
-    return 1
-
-# TODO: Can completely remove returning the loss and directly use ln:57 in the naive training loop as is.
