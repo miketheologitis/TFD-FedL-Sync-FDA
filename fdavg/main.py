@@ -24,7 +24,7 @@ if __name__ == "__main__":
     derive_extra_params(exper_info)
     test_id = get_test_id(exper_info)
 
-    if exper_info['task_id'] == 0:
+    if exper_info['task_index'] == 0:
         print(test_id)
 
     # Run experiments

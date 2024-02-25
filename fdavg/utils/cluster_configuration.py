@@ -97,9 +97,7 @@ def config_slurm_cluster():
     resolver = tf.distribute.cluster_resolver.SlurmClusterResolver(port_base=5000)
 
     cluster = resolver.cluster_spec()
-    print(cluster)
     job_name, task_index = resolver.get_task_info()
-    print(f"job name:{job_name}, task_index: {task_index}")
 
     return task_index, resolver
 
