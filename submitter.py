@@ -49,7 +49,7 @@ echo "Finished program"
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
 # Relative path to the tmp directory
-tmp_dir = '../metrics/tmp'
+tmp_dir = 'metrics/tmp'
 comb_dir = os.path.normpath(os.path.join(script_directory, f'{tmp_dir}/combinations'))
 
 
