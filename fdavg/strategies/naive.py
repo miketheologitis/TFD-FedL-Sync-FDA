@@ -24,15 +24,13 @@ def naive_rtc(multi_worker_model, w_t0, theta):
         or not (False).
     """
 
-    print("Inside 1")
     drift = trainable_vars_as_vector(multi_worker_model.trainable_variables) - w_t0
-    print("Inside 2")
+
     drift_sq = tf.reduce_sum(tf.square(drift))
-    print("Inside 3")
+
     avg_drift_sq = tf.distribute.get_replica_context().all_reduce(
         tf.distribute.ReduceOp.MEAN, drift_sq
     )
-    print("Inside 4")
 
     return avg_drift_sq > theta
 
@@ -56,6 +54,8 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
             loss = fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_size)
             total_loss += loss
             num_epoch_steps += 1
+
+            print(f"Step: DONE!!")
 
             if naive_rtc(multi_worker_model, w_t0, theta):
                 print(f"Synchronization Needed in Step {num_epoch_steps}")
