@@ -25,7 +25,7 @@ def derive_extra_params(exper_info):
     exper_info['num_workers'] = int(exper_info['num_replicas'] / exper_info['num_replicas_per_worker'])
 
     if exper_info["ds_name"] == "MNIST":
-        exper_info["num_steps_per_epoch"] = (MNIST_N_TRAIN // exper_info['num_of_workers'] //
+        exper_info["num_steps_per_epoch"] = (MNIST_N_TRAIN // exper_info['num_workers'] //
                                              exper_info['per_worker_batch_size'])
 
         exper_info['dataset_fn'] = mnist_dataset_fn
@@ -37,7 +37,7 @@ def derive_extra_params(exper_info):
             exper_info['build_and_compile_model_fn'] = build_and_compile_advanced_cnn_for_mnist
 
     if exper_info["ds_name"] == "CIFAR10":
-        exper_info["num_steps_per_epoch"] = (CIFAR10_N_TRAIN // exper_info['num_of_workers'] //
+        exper_info["num_steps_per_epoch"] = (CIFAR10_N_TRAIN // exper_info['num_workers'] //
                                              exper_info['per_worker_batch_size'])
 
         exper_info['dataset_fn'] = cifar10_dataset_fn
