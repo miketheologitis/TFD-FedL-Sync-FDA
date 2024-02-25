@@ -24,7 +24,8 @@ if __name__ == "__main__":
     derive_extra_params(exper_info)
     test_id = get_test_id(exper_info)
 
-    print(test_id)
+    if exper_info['task_id'] == 0:
+        print(test_id)
 
     # Run experiments
     epoch_metrics = multi_worker_mirrored_train(exper_info)

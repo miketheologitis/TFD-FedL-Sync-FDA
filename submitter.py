@@ -34,17 +34,9 @@ module load intelmpi/2018
 module load python/3.8.13
 module load tftorch/270-191
 
-echo node name, name of the current node: $SLURMD_NODENAME
-echo job node list, list of all nodes allocated to the job: $SLURM_JOB_NODELIST
-echo job num nodes, number of nodes the job is using: $SLURM_JOB_NUM_NODES
-echo step node list: $SLURM_STEP_NODELIST
-echo "Running program"
-
 export TF_XLA_FLAGS="--tf_xla_enable_xla_devices"
 
 srun python -u -m fdavg.main --comb_file_id {comb_id} --exper_id {exper_id}
-
-echo "Finished program"
 """
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
