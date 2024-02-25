@@ -8,7 +8,7 @@ from math import sqrt
 def prepare_multi_worker_mirrored_train(exper_info):
 
     if exper_info['slurm']:
-        strategy = tf.distribute.MultiWorkerMirroredStrategy(exper_info['resolver'])
+        strategy = tf.distribute.MultiWorkerMirroredStrategy(exper_info['slurm_cluster'])
     else:
         strategy = tf.distribute.MultiWorkerMirroredStrategy()
 
