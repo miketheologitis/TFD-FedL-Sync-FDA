@@ -61,4 +61,7 @@ def fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_siz
     return strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_losses, axis=None)
 """
 
+def fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_size):
+    return 1
+
 # TODO: Can completely remove returning the loss and directly use ln:57 in the naive training loop as is.
