@@ -63,7 +63,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--comb_file_id', type=int, help="The combinations prefix, i.e., <PREFIX>.json.",
                         required=True)
-    parser.add_argument('--walltime', type=str, default="04:00:00", help="Walltime.")
     args = parser.parse_args()
 
     experiments = get_all_experiments_information(args.comb_file_id)
@@ -79,7 +78,7 @@ if __name__ == '__main__':
             n_tasks=num_workers,
             n_nodes=num_workers,
             mem=ARIS_NODE_MEM,
-            walltime=args.walltime,
+            walltime=exper['walltime'],
             comb_id=args.comb_file_id,
             exper_id=i
         )
