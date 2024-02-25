@@ -96,12 +96,11 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
                 synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
 
                 tmp = trainable_vars_as_vector(synced_model_vars)
-                print(f"Sync: {num_total_rounds} here ----> {tf.reduce_mean(tmp)}")
+                #print(f"Sync: {num_total_rounds} here ----> {tf.reduce_mean(tmp)}")
 
                 update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
 
                 w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
-                #print(f"Sync: {num_total_rounds} w_t0 average: {tf.reduce_mean(w_t0)}")
                 num_total_rounds += 1
 
         # TODO: epoch ends, find accuracy
