@@ -44,6 +44,7 @@ def create_combinations(args):
         combination["slurm"] = args.slurm
         combination["walltime"] = args.walltime
         combination["workers_ip_port"] = args.workers_ip_port
+        combination["num_replicas_per_worker"] = args.num_replicas_per_worker
 
         combination["exper_filename"] = (
             f"{combination['nn_name'].replace('-', '')}_{combination['strat_name']}_"
