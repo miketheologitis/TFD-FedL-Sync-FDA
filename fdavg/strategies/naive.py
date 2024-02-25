@@ -6,7 +6,7 @@ from fdavg.utils.distributed_ops import aggregate_models
 from fdavg.metrics.metrics import EpochMetrics
 
 
-def naive_rtc(multi_worker_model, w_t0, theta):
+def naive_var_approx(multi_worker_model, w_t0, theta):
     """
     Round Terminating Condition for NaiveFDA
 
@@ -25,18 +25,6 @@ def naive_rtc(multi_worker_model, w_t0, theta):
         or not (False).
     """
 
-    drift = trainable_vars_as_vector(multi_worker_model.trainable_variables) - w_t0
-
-    drift_sq = tf.reduce_sum(tf.square(drift))
-
-    avg_drift_sq = tf.distribute.get_replica_context().all_reduce(
-        tf.distribute.ReduceOp.MEAN, drift_sq
-    )
-
-    return avg_drift_sq > theta
-
-
-def test_all_reduce(multi_worker_model, w_t0, theta):
     drift = trainable_vars_as_vector(multi_worker_model.trainable_variables) - w_t0
 
     drift_sq = tf.reduce_sum(tf.square(drift))
@@ -70,15 +58,13 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
             num_epoch_steps += 1
             num_total_steps += 1
 
-            if naive_rtc(multi_worker_model, w_t0, theta):
-                x = strategy.run(test_all_reduce, args=(multi_worker_model, w_t0, theta))
-                #x = test_all_reduce(multi_worker_model, w_t0, theta)
-                print(f"Sync: {num_total_rounds} PLZ ----> {tf.reduce_mean(x)}")
-
+            est_var = strategy.run(naive_var_approx, args=(multi_worker_model, w_t0, theta))
+            print(f"Step: {num_total_steps} here ----> {est_var}")
+            if est_var > theta:
                 # Synchronization needed - Round terminates
                 synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
 
-                tmp = trainable_vars_as_vector(synced_model_vars)
+                #tmp = trainable_vars_as_vector(synced_model_vars)
                 #print(f"Sync: {num_total_rounds} here ----> {tf.reduce_mean(tmp)}")
 
                 update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
