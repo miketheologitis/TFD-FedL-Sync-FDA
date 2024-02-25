@@ -55,11 +55,12 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
 
             if naive_rtc(multi_worker_model, w_t0, theta):
                 # Synchronization needed - Round terminates
-                synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
-                update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
+                #synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
+                #update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
 
-                w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
-                num_epoch_rounds += 1
+                #w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
+                #num_epoch_rounds += 1
+                pass
 
         # TODO: epoch ends, find accuracy
 
