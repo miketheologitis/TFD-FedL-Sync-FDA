@@ -41,23 +41,21 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
 
     epoch_metrics = []
 
-    epoch = 0
-
     w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)  # tf.Tensor vector w/ shape=(d,)
+
+    epoch, num_total_rounds, num_total_steps = 0, 0, 0
 
     while epoch <= num_epochs:
         start_epoch_time = time.time()
 
         iterator = iter(multi_worker_dataset)
-        total_loss, num_epoch_rounds, num_epoch_steps, total_steps = 0.0, 0, 0, 0
+        num_epoch_steps = 0
 
         while num_epoch_steps <= num_steps_per_epoch:
 
-            #loss = fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_size)
-            #total_loss += loss
             strategy.run(fda_step_fn, args=(next(iterator), multi_worker_model, per_replica_batch_size))
             num_epoch_steps += 1
-            total_steps += 1
+            num_total_steps += 1
 
             if naive_rtc(multi_worker_model, w_t0, theta):
                 print(f"Synchronization Needed in Step {num_epoch_steps}")
@@ -66,14 +64,13 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
                 update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
 
                 w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
-                num_epoch_rounds += 1
+                num_total_rounds += 1
 
         # TODO: epoch ends, find accuracy
-        #train_loss = total_loss / num_epoch_steps
         epoch += 1
 
         epoch_duration_sec = time.time() - start_epoch_time
-        met = EpochMetrics(epoch, num_epoch_rounds, total_steps, epoch_duration_sec, 0.0)
+        met = EpochMetrics(epoch, num_total_rounds, num_total_steps, epoch_duration_sec, 0.0)
         epoch_metrics.append(met)
 
         print(met)
