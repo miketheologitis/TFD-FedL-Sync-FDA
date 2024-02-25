@@ -45,7 +45,7 @@ def create_combinations(args):
         combination["walltime"] = args.walltime
         combination["workers_ip_port"] = args.workers_ip_port
 
-        combination["test_filename"] = (
+        combination["exper_filename"] = (
             f"{combination['nn_name'].replace('-', '')}_{combination['strat_name']}_"
             f"b{combination['per_replica_batch_size']}"
             f"_c{combination['num_replicas']}_t{str(combination['theta']).replace('.', '')}"

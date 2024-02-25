@@ -23,6 +23,7 @@ def prepare_multi_worker_mirrored_train(exper_info):
 
 
 def multi_worker_mirrored_train(exper_info):
+    step_metrics, epoch_metrics = None, None
 
     strategy, multi_worker_model, multi_worker_dataset = prepare_multi_worker_mirrored_train(exper_info)
 

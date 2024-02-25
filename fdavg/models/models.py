@@ -296,6 +296,8 @@ def dense_net_fn(blocks, input_shape, classes):
 
 
 def get_densenet(name, input_shape=(32, 32, 3), classes=10):
+    model = None
+
     if name == 'DenseNet121':
         model = dense_net_fn([6, 12, 24, 16], input_shape, classes)
     if name == 'DenseNet169':
