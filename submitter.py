@@ -23,7 +23,6 @@ slurm_template = """#!/bin/bash -l
 #SBATCH --mem={mem}     # memory per NODE
 #SBATCH --time={walltime}   # walltime
 #SBATCH --partition=gpu    # Partition
-#SBATCH --gres=gpu:{gpus_per_node}
 #SBATCH --account=pa240202
 
 ## LOAD MODULES ##
@@ -80,7 +79,6 @@ if __name__ == '__main__':
             n_nodes=num_workers,
             mem=ARIS_NODE_MEM,
             walltime=exper['walltime'],
-            gpus_per_node=exper['num_replicas_per_worker'],
             comb_id=args.comb_file_id,
             exper_id=i
         )
