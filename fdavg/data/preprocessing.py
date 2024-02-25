@@ -8,15 +8,16 @@ CIFAR10_N_TRAIN = 50_000
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
-mnist_dir = 'data/mnist/'
+mnist_dir = 'data/mnist'
 mnist_data = os.path.normpath(os.path.join(script_dir, f'{mnist_dir}/mnist.npz'))
 
-cifar10_dir = 'data/cifar10/'
+cifar10_dir = 'data/cifar10'
 cifar10_part1_data = os.path.normpath(os.path.join(script_dir, f'{cifar10_dir}/cifar10_part1.npz'))
 cifar10_part2_data = os.path.normpath(os.path.join(script_dir, f'{cifar10_dir}/cifar10_part2.npz'))
 
 
 def load_mnist_from_local_npz():
+    print(mnist_dir)
     with np.load(mnist_dir) as data:
         return (data['X_train'], data['y_train']), (data['X_test'], data['y_test'])
 
