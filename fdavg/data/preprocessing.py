@@ -17,8 +17,7 @@ cifar10_part2_data = os.path.normpath(os.path.join(script_dir, f'{cifar10_dir}/c
 
 
 def load_mnist_from_local_npz():
-    print(mnist_dir)
-    with np.load(mnist_dir) as data:
+    with np.load(mnist_data) as data:
         return (data['X_train'], data['y_train']), (data['X_test'], data['y_test'])
 
 
