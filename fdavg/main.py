@@ -27,15 +27,9 @@ if __name__ == "__main__":
     print(test_id)
 
     # Run experiments
-    step_metrics, epoch_metrics = multi_worker_mirrored_train(exper_info)
+    epoch_metrics = multi_worker_mirrored_train(exper_info)
 
-    step_metrics_df = pd.DataFrame(process_step_metrics_with_test_id(step_metrics, test_id))
     epoch_metrics_df = pd.DataFrame(process_epoch_metrics_with_test_id(epoch_metrics, test_id))
-
-    step_metrics_df.to_csv(
-        f"{STEP_METRICS_PATH}/task{exper_info['task_index']}_{exper_info['exper_filename']}.csv",
-        index=False
-    )
     epoch_metrics_df.to_csv(
         f"{EPOCH_METRICS_PATH}/task{exper_info['task_index']}_{exper_info['exper_filename']}.csv",
         index=False

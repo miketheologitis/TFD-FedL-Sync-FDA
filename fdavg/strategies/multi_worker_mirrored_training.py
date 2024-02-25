@@ -23,12 +23,12 @@ def prepare_multi_worker_mirrored_train(exper_info):
 
 
 def multi_worker_mirrored_train(exper_info):
-    step_metrics, epoch_metrics = None, None
+    epoch_metrics = None
 
     strategy, multi_worker_model, multi_worker_dataset = prepare_multi_worker_mirrored_train(exper_info)
 
     if exper_info['strat_name'] == 'naive':
-        step_metrics, epoch_metrics = naive_training_loop(
+        epoch_metrics = naive_training_loop(
             strategy=strategy,
             multi_worker_model=multi_worker_model,
             multi_worker_dataset=multi_worker_dataset,
@@ -39,7 +39,7 @@ def multi_worker_mirrored_train(exper_info):
         )
 
     if exper_info['strat_name'] == 'linear':
-        step_metrics, epoch_metrics = linear_training_loop(
+        epoch_metrics = linear_training_loop(
             strategy=strategy,
             multi_worker_model=multi_worker_model,
             multi_worker_dataset=multi_worker_dataset,
@@ -55,7 +55,7 @@ def multi_worker_mirrored_train(exper_info):
         ams_sketch = AmsSketch(width=sketch_width, depth=sketch_depth, with_seed=True)
         epsilon = 1. / sqrt(sketch_width)
 
-        step_metrics, epoch_metrics = sketch_training_loop(
+        epoch_metrics = sketch_training_loop(
             strategy=strategy,
             multi_worker_model=multi_worker_model,
             multi_worker_dataset=multi_worker_dataset,
@@ -67,4 +67,4 @@ def multi_worker_mirrored_train(exper_info):
             epsilon=epsilon
         )
 
-    return step_metrics, epoch_metrics
+    return epoch_metrics

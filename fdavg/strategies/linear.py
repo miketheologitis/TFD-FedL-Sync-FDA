@@ -66,7 +66,7 @@ def linear_rtc(multi_worker_model, w_t0, w_tminus1, theta):
 def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset,
                          num_epochs, num_steps_per_epoch, theta, per_replica_batch_size):
 
-    step_metrics, epoch_metrics = [], []
+    epoch_metrics = []
 
     epoch = 0
 
@@ -98,4 +98,4 @@ def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset,
 
         print(f"Epoch: {epoch}, train_loss:{train_loss}")
 
-    return step_metrics, epoch_metrics
+    return step_metrics
