@@ -49,11 +49,14 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
         total_loss, num_epoch_rounds, num_epoch_steps = 0.0, 0, 0
 
         while num_epoch_steps <= num_steps_per_epoch:
+            print(f"Step: {num_epoch_steps}")
+
             loss = fda_train_step(strategy, iterator, multi_worker_model, per_replica_batch_size)
             total_loss += loss
             num_epoch_steps += 1
 
             if naive_rtc(multi_worker_model, w_t0, theta):
+                print(f"Synchronization Needed in Step {num_epoch_steps}")
                 # Synchronization needed - Round terminates
                 #synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
                 #update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
