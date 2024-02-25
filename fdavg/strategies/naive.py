@@ -24,13 +24,15 @@ def naive_rtc(multi_worker_model, w_t0, theta):
         or not (False).
     """
 
+    print("Inside 1")
     drift = trainable_vars_as_vector(multi_worker_model.trainable_variables) - w_t0
-
+    print("Inside 2")
     drift_sq = tf.reduce_sum(tf.square(drift))
-
+    print("Inside 3")
     avg_drift_sq = tf.distribute.get_replica_context().all_reduce(
         tf.distribute.ReduceOp.MEAN, drift_sq
     )
+    print("Inside 4")
 
     return avg_drift_sq > theta
 
@@ -58,12 +60,11 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
             if naive_rtc(multi_worker_model, w_t0, theta):
                 print(f"Synchronization Needed in Step {num_epoch_steps}")
                 # Synchronization needed - Round terminates
-                #synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
-                #update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
+                synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
+                update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
 
-                #w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
-                #num_epoch_rounds += 1
-                pass
+                w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
+                num_epoch_rounds += 1
 
         # TODO: epoch ends, find accuracy
 
