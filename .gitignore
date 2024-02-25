@@ -1,0 +1,9 @@
+.ipynb_checkpoints
+__pycache__
+.idea
+dist/
+*.egg-info/
+build/
+metrics/tmp/local_out/*
+metrics/tmp/slurm_out/*
+metrics/tmp/combinations/*
