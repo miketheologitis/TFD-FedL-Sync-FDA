@@ -65,7 +65,8 @@ def linear_var_approx(multi_worker_model, w_t0, w_tminus1):
 
 
 def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset, multi_worker_model_for_test,
-                         multi_worker_test_dataset, num_epochs, num_steps_per_epoch, theta, per_replica_batch_size):
+                         multi_worker_test_dataset, test_accuracy_metric, num_epochs, num_steps_per_epoch, theta,
+                         per_replica_batch_size):
 
     epoch_metrics = []
 

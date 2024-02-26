@@ -38,7 +38,8 @@ def naive_var_approx(multi_worker_model, w_t0):
 
 
 def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, multi_worker_model_for_test,
-                        multi_worker_test_dataset, num_epochs, num_steps_per_epoch, theta, per_replica_batch_size):
+                        multi_worker_test_dataset, test_accuracy_metric, num_epochs, num_steps_per_epoch, theta,
+                        per_replica_batch_size):
 
     epoch_metrics = []
 
@@ -77,7 +78,7 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
         # ---- METRICS ----
         epoch_duration_sec = time.time() - start_epoch_time
         acc = accuracy_of_distributed_model(
-            strategy, multi_worker_model, multi_worker_model_for_test, multi_worker_test_dataset
+            strategy, multi_worker_model, multi_worker_model_for_test, test_accuracy_metric, multi_worker_test_dataset
         )
         e_met = EpochMetrics(epoch, num_total_rounds, num_total_steps, epoch_duration_sec, acc)
         epoch_metrics.append(e_met)

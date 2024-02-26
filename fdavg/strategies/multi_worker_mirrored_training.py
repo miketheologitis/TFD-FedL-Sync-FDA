@@ -6,7 +6,6 @@ from math import sqrt
 
 
 def prepare_multi_worker_mirrored_train(exper_info):
-
     if exper_info['slurm']:
         strategy = tf.distribute.MultiWorkerMirroredStrategy(exper_info['slurm_cluster'])
     else:
@@ -19,21 +18,23 @@ def prepare_multi_worker_mirrored_train(exper_info):
             lambda input_context: exper_info['dataset_fn'](exper_info['global_batch_size'], input_context)
         )
 
-        # TODO: testing dataset, tmp model for testing
         multi_worker_model_for_test = exper_info['build_and_compile_model_fn']()
 
         multi_worker_test_dataset = strategy.distribute_datasets_from_function(
             lambda input_context: exper_info['test_dataset_fn'](exper_info['global_batch_size'], input_context)
         )
 
-    return strategy, multi_worker_model, multi_worker_dataset, multi_worker_model_for_test, multi_worker_test_dataset
+        test_accuracy_metric = tf.keras.metrics.SparseCategoricalAccuracy(name='accuracy')
+
+    return (strategy, multi_worker_model, multi_worker_dataset, multi_worker_model_for_test, multi_worker_test_dataset,
+            test_accuracy_metric)
 
 
 def multi_worker_mirrored_train(exper_info):
     epoch_metrics = None
 
-    strategy, multi_worker_model, multi_worker_dataset, multi_worker_model_for_test, multi_worker_test_dataset = (
-        prepare_multi_worker_mirrored_train(exper_info))
+    (strategy, multi_worker_model, multi_worker_dataset, multi_worker_model_for_test, multi_worker_test_dataset,
+     test_accuracy_metric) = prepare_multi_worker_mirrored_train(exper_info)
 
     if exper_info['strat_name'] == 'naive':
         epoch_metrics = naive_training_loop(
@@ -42,6 +43,7 @@ def multi_worker_mirrored_train(exper_info):
             multi_worker_dataset=multi_worker_dataset,
             multi_worker_model_for_test=multi_worker_model_for_test,
             multi_worker_test_dataset=multi_worker_test_dataset,
+            test_accuracy_metric=test_accuracy_metric,
             num_epochs=exper_info['num_epochs'],
             num_steps_per_epoch=exper_info['num_steps_per_epoch'],
             theta=exper_info['theta'],
@@ -55,6 +57,7 @@ def multi_worker_mirrored_train(exper_info):
             multi_worker_dataset=multi_worker_dataset,
             multi_worker_model_for_test=multi_worker_model_for_test,
             multi_worker_test_dataset=multi_worker_test_dataset,
+            test_accuracy_metric=test_accuracy_metric,
             num_epochs=exper_info['num_epochs'],
             num_steps_per_epoch=exper_info['num_steps_per_epoch'],
             theta=exper_info['theta'],
@@ -62,7 +65,6 @@ def multi_worker_mirrored_train(exper_info):
         )
 
     if exper_info['strat_name'] == 'sketch':
-
         sketch_width, sketch_depth = 250, 5
         ams_sketch = AmsSketch(width=sketch_width, depth=sketch_depth, with_seed=True)
         epsilon = 1. / sqrt(sketch_width)
@@ -73,6 +75,7 @@ def multi_worker_mirrored_train(exper_info):
             multi_worker_dataset=multi_worker_dataset,
             multi_worker_model_for_test=multi_worker_model_for_test,
             multi_worker_test_dataset=multi_worker_test_dataset,
+            test_accuracy_metric=test_accuracy_metric,
             num_epochs=exper_info['num_epochs'],
             num_steps_per_epoch=exper_info['num_steps_per_epoch'],
             theta=exper_info['theta'],
@@ -82,4 +85,3 @@ def multi_worker_mirrored_train(exper_info):
         )
 
     return epoch_metrics
-
