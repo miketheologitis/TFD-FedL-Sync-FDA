@@ -49,7 +49,7 @@ def accuracy_of_distributed_model(strategy, multi_worker_model, multi_worker_mod
     for inputs in distributed_test_dataset:
         strategy.run(test_step, args=(multi_worker_model_for_test, inputs, test_accuracy_metric))
 
-    return test_accuracy_metric.result()
+    return test_accuracy_metric.result().numpy()
 
 
 def acc_test(strategy, multi_worker_model):
