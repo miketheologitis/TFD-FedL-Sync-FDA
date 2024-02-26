@@ -3,7 +3,8 @@ import os
 from fdavg.models.models import (build_and_compile_densenet_for_cifar10, build_and_compile_lenet5_for_mnist,
                                  build_and_compile_advanced_cnn_for_mnist)
 from functools import partial
-from fdavg.data.preprocessing import mnist_dataset_fn, cifar10_dataset_fn, MNIST_N_TRAIN, CIFAR10_N_TRAIN
+from fdavg.data.preprocessing import (mnist_dataset_fn, cifar10_dataset_fn, mnist_test_dataset_fn,
+                                      cifar10_test_dataset_fn, MNIST_N_TRAIN, CIFAR10_N_TRAIN)
 from fdavg.metrics.metrics import TestId
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +30,7 @@ def derive_extra_params(exper_info):
                                              exper_info['per_worker_batch_size'])
 
         exper_info['dataset_fn'] = mnist_dataset_fn
+        exper_info['test_dataset_fn'] = mnist_test_dataset_fn
 
         if exper_info["nn_name"] == 'LeNet-5':
             exper_info['build_and_compile_model_fn'] = build_and_compile_lenet5_for_mnist
@@ -41,6 +43,7 @@ def derive_extra_params(exper_info):
                                              exper_info['per_worker_batch_size'])
 
         exper_info['dataset_fn'] = cifar10_dataset_fn
+        exper_info['test_dataset_fn'] = cifar10_test_dataset_fn
 
         # Assumed NN is a DenseNet
         exper_info['build_and_compile_model_fn'] = partial(

@@ -3,7 +3,8 @@ import tensorflow as tf
 from fdavg.strategies.fda import fda_step_fn
 from fdavg.models.miscellaneous import trainable_vars_as_vector
 from fdavg.metrics.metrics import EpochMetrics
-from fdavg.utils.distributed_ops import average_and_sync_model_trainable_variables
+from fdavg.strategies.multi_worker_mirrored_training import (average_and_sync_model_trainable_variables,
+                                                             accuracy_of_distributed_model)
 
 
 def ksi_unit(w_t0, w_tminus1):
@@ -64,8 +65,8 @@ def linear_var_approx(multi_worker_model, w_t0, w_tminus1):
     return avg_drift_sq - avg_ksi_dot_drift**2
 
 
-def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset,
-                         num_epochs, num_steps_per_epoch, theta, per_replica_batch_size):
+def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset, multi_worker_model_for_test,
+                         multi_worker_test_dataset, num_epochs, num_steps_per_epoch, theta, per_replica_batch_size):
 
     epoch_metrics = []
 

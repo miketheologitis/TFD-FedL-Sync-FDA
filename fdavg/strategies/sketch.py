@@ -4,7 +4,8 @@ import numpy as np
 from fdavg.strategies.fda import fda_step_fn
 from fdavg.models.miscellaneous import trainable_vars_as_vector
 from fdavg.metrics.metrics import EpochMetrics
-from fdavg.utils.distributed_ops import average_and_sync_model_trainable_variables
+from fdavg.strategies.multi_worker_mirrored_training import (average_and_sync_model_trainable_variables,
+                                                             accuracy_of_distributed_model)
 
 
 class AmsSketch:
@@ -162,8 +163,9 @@ def sketch_var_approx(multi_worker_model, w_t0, ams_sketch, epsilon):
     return avg_drift_sq - (1. / (1. + epsilon) * AmsSketch.estimate_euc_norm_squared(avg_sketch))
 
 
-def sketch_training_loop(strategy, multi_worker_model, multi_worker_dataset,
-                         num_epochs, num_steps_per_epoch, theta, per_replica_batch_size, ams_sketch, epsilon):
+def sketch_training_loop(strategy, multi_worker_model, multi_worker_dataset, multi_worker_model_for_test,
+                         multi_worker_test_dataset, num_epochs, num_steps_per_epoch, theta, per_replica_batch_size,
+                         ams_sketch, epsilon):
 
     epoch_metrics = []
 

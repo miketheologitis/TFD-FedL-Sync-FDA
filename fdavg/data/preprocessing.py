@@ -44,6 +44,15 @@ def mnist_worker_dataset(num_workers, i):
     return tf.data.Dataset.from_tensor_slices((X_train_lst[i], y_train_lst[i]))
 
 
+def mnist_worker_test_dataset(num_workers, i):
+    _, _, X_test, y_test = mnist_load_data()
+
+    X_test_lst = np.array_split(X_test, num_workers)
+    y_test_lst = np.array_split(y_test, num_workers)
+
+    return tf.data.Dataset.from_tensor_slices((X_test_lst[i], y_test_lst[i]))
+
+
 def mnist_dataset_fn(global_batch_size, input_context):
     batch_size = input_context.get_per_replica_batch_size(global_batch_size)
 
@@ -52,6 +61,14 @@ def mnist_dataset_fn(global_batch_size, input_context):
     shuffle_size = dataset.cardinality()
 
     return dataset.shuffle(shuffle_size).batch(batch_size).prefetch(10)
+
+
+def mnist_test_dataset_fn(global_batch_size, input_context):
+    batch_size = input_context.get_per_replica_batch_size(global_batch_size)
+
+    dataset = mnist_worker_test_dataset(input_context.num_input_pipelines, input_context.input_pipeline_id)
+
+    return dataset.batch(batch_size).prefetch(1)
 
 
 # CIFAR-10
@@ -91,6 +108,15 @@ def cifar10_worker_dataset(num_workers, i):
     return tf.data.Dataset.from_tensor_slices((X_train_lst[i], y_train_lst[i]))
 
 
+def cifar10_worker_test_dataset(num_workers, i):
+    _, _, X_test, y_test = cifar10_load_data()
+
+    X_test_lst = np.array_split(X_test, num_workers)
+    y_test_lst = np.array_split(y_test, num_workers)
+
+    return tf.data.Dataset.from_tensor_slices((X_test_lst[i], y_test_lst[i]))
+
+
 def cifar10_dataset_fn(global_batch_size, input_context):
     batch_size = input_context.get_per_replica_batch_size(global_batch_size)
 
@@ -99,3 +125,11 @@ def cifar10_dataset_fn(global_batch_size, input_context):
     shuffle_size = dataset.cardinality()
 
     return dataset.shuffle(shuffle_size).batch(batch_size).prefetch(10)
+
+
+def cifar10_test_dataset_fn(global_batch_size, input_context):
+    batch_size = input_context.get_per_replica_batch_size(global_batch_size)
+
+    dataset = cifar10_worker_test_dataset(input_context.num_input_pipelines, input_context.input_pipeline_id)
+
+    return dataset.batch(batch_size).prefetch(1)
