@@ -29,12 +29,6 @@ def mnist_load_data():
     return X_train, y_train, X_test, y_test
 
 
-def mnist_load_test_data():
-    _, _, X_test, y_test = mnist_load_data()
-
-    return tf.data.Dataset.from_tensor_slices((X_test, y_test)).batch(1024)
-
-
 def mnist_worker_dataset(num_workers, i):
     X_train, y_train, _, _ = mnist_load_data()
 

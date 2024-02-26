@@ -3,7 +3,7 @@ import tensorflow as tf
 from fdavg.strategies.fda import fda_step_fn
 from fdavg.models.miscellaneous import trainable_vars_as_vector
 from fdavg.metrics.metrics import EpochMetrics
-from fdavg.utils.distributed_ops import average_and_sync_model_trainable_variables, accuracy_of_distributed_model
+from fdavg.utils.distributed_ops import average_and_sync_model_trainable_variables, accuracy_of_distributed_model, acc_test
 
 
 def naive_var_approx(multi_worker_model, w_t0):
@@ -83,6 +83,8 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
         e_met = EpochMetrics(epoch, num_total_rounds, num_total_steps, epoch_duration_sec, acc)
         epoch_metrics.append(e_met)
         print(e_met)
+        test_acc = acc_test(strategy, multi_worker_model)
+        print(f"Found this acc: {test_acc}")
         # ---- METRICS ----
 
     return epoch_metrics

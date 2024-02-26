@@ -50,3 +50,20 @@ def accuracy_of_distributed_model(strategy, multi_worker_model, multi_worker_mod
         strategy.run(test_step, args=(multi_worker_model_for_test, inputs, test_accuracy_metric))
 
     return test_accuracy_metric.result()
+
+
+def acc_test(strategy, multi_worker_model):
+    from fdavg.models.models import build_and_compile_advanced_cnn_for_mnist
+    from fdavg.data.preprocessing import mnist_load_data
+
+    tmp = build_and_compile_advanced_cnn_for_mnist()
+    _, _, X, y = mnist_load_data()
+
+    avg_train_model_vars = strategy.run(average_model_trainable_variables, args=(multi_worker_model,))
+
+    # Update testing model's trainable variables per-replica
+    update_model_vars(tmp.trainable_variables, avg_train_model_vars)
+
+    _, acc = tmp.evaluate(x=X, y=y, batch_size=256, verbose=0)
+
+    return acc
