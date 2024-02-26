@@ -2,9 +2,8 @@ import time
 import tensorflow as tf
 from fdavg.strategies.fda import fda_step_fn
 from fdavg.models.miscellaneous import trainable_vars_as_vector
-from fdavg.strategies.multi_worker_mirrored_training import (average_and_sync_model_trainable_variables,
-                                                             accuracy_of_distributed_model)
 from fdavg.metrics.metrics import EpochMetrics
+from fdavg.utils.distributed_ops import average_and_sync_model_trainable_variables, accuracy_of_distributed_model
 
 
 def naive_var_approx(multi_worker_model, w_t0):
