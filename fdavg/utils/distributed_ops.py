@@ -1,14 +1,23 @@
 import tensorflow as tf
+from fdavg.models.miscellaneous import update_model_vars
 
 
-# Forced to create it because batch_reduced_to (which is the recommended approch works in TF 2.12 but not it TF 2.7)
-def my_reduce(value_to_be_reduced, dest):
+def average_model_trainable_variables(multi_worker_model):
 
-    def _merge_fn_mean(distribution, _value_to_be_reduced, _dest):
-        return distribution.extended.reduce_to(tf.distribute.ReduceOp.MEAN, _value_to_be_reduced, destinations=_dest)
-
-    return tf.distribute.get_replica_context().merge_call(_merge_fn_mean, args=(value_to_be_reduced, dest))
+    return tf.distribute.get_replica_context().all_reduce(
+        tf.distribute.ReduceOp.MEAN, multi_worker_model.trainable_variables
+    )
 
 
-def aggregate_models(model_variables):
-    return [my_reduce(tf.convert_to_tensor(v), v) for v in model_variables]
+def average_model_non_trainable_variables(multi_worker_model):
+
+    return tf.distribute.get_replica_context().all_reduce(
+        tf.distribute.ReduceOp.MEAN, multi_worker_model.non_trainable_variables
+    )
+
+
+def average_and_sync_model_trainable_variables(multi_worker_model):
+
+    synced_model_vars = average_model_trainable_variables(multi_worker_model)
+
+    update_model_vars(multi_worker_model.trainable_variables, synced_model_vars)

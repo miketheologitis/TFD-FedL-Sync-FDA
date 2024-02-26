@@ -1,9 +1,9 @@
 import time
 import tensorflow as tf
 from fdavg.strategies.fda import fda_step_fn
-from fdavg.models.miscellaneous import trainable_vars_as_vector, update_distributed_model_vars_from_tensors
-from fdavg.utils.distributed_ops import aggregate_models
+from fdavg.models.miscellaneous import trainable_vars_as_vector
 from fdavg.metrics.metrics import EpochMetrics
+from fdavg.utils.distributed_ops import average_and_sync_model_trainable_variables
 
 
 def ksi_unit(w_t0, w_tminus1):
@@ -87,13 +87,14 @@ def linear_training_loop(strategy, multi_worker_model, multi_worker_dataset,
             num_epoch_steps += 1
             num_total_steps += 1
 
-            # Estimate Variance
+            # Estimate variance, invokes `naive_var_approx` on each replica. After all-reduce operation `est_var`
+            # is the same for all replicas, managed by each worker (who is responsible for some replicas).
             est_var = strategy.run(linear_var_approx, args=(multi_worker_model, w_t0, w_tminus1))
 
             if est_var > theta:
-                # Synchronization needed - Round terminates
-                synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
-                update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
+                # All-reduce w/ averaging and synchronization of all per-replica models. After this all per-replica
+                # models are the same (invokes `average_and_sync_model_trainable_variables` on each replica).
+                strategy.run(average_and_sync_model_trainable_variables, args=(multi_worker_model,))
 
                 w_tminus1 = w_t0
                 w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)

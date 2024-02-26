@@ -1,8 +1,8 @@
 import time
 import tensorflow as tf
 from fdavg.strategies.fda import fda_step_fn
-from fdavg.models.miscellaneous import trainable_vars_as_vector, update_distributed_model_vars_from_tensors, update_model_vars
-from fdavg.utils.distributed_ops import aggregate_models
+from fdavg.models.miscellaneous import trainable_vars_as_vector
+from fdavg.utils.distributed_ops import average_and_sync_model_trainable_variables
 from fdavg.metrics.metrics import EpochMetrics
 
 
@@ -37,21 +37,6 @@ def naive_var_approx(multi_worker_model, w_t0):
     return avg_drift_sq
 
 
-def aggr_models(multi_worker_model):
-
-    return tf.distribute.get_replica_context().all_reduce(
-        tf.distribute.ReduceOp.MEAN, multi_worker_model.trainable_variables
-    )
-
-def aggr_models2(multi_worker_model):
-
-    synced_model_vars = tf.distribute.get_replica_context().all_reduce(
-        tf.distribute.ReduceOp.MEAN, multi_worker_model.trainable_variables
-    )
-
-    update_model_vars(multi_worker_model.trainable_variables, synced_model_vars)
-
-
 def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
                         num_epochs, num_steps_per_epoch, theta, per_replica_batch_size):
 
@@ -79,19 +64,9 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
             est_var = strategy.run(naive_var_approx, args=(multi_worker_model, w_t0))
 
             if est_var > theta:
-                # Synchronization needed - Round terminates
-                #TODO: synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
-
-                print("hi 1")
-                strategy.run(aggr_models2, args=(multi_worker_model,))
-
-                tmp = trainable_vars_as_vector(multi_worker_model.trainable_variables)
-                print(f"tmp: {tf.reduce_mean(tmp)}")
-
-                #tmp = trainable_vars_as_vector(synced_model_vars)
-                #print(f"Sync: {num_total_rounds} here ----> {tf.reduce_mean(tmp)}")
-
-                #TODO: update_distributed_model_vars_from_tensors(multi_worker_model.trainable_variables, synced_model_vars)
+                # All-reduce w/ averaging and synchronization of all per-replica models. After this all per-replica
+                # models are the same (invokes `average_and_sync_model_trainable_variables` on each replica).
+                strategy.run(average_and_sync_model_trainable_variables, args=(multi_worker_model,))
 
                 w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
                 num_total_rounds += 1
