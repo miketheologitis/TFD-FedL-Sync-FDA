@@ -30,7 +30,7 @@ def accuracy_of_distributed_model(strategy, multi_worker_model, multi_worker_mod
 
         predictions = _multi_worker_model(images, training=False)
 
-        accuracy_metric = _multi_worker_model.metrics[0]
+        accuracy_metric = _multi_worker_model.metrics[1]
 
         accuracy_metric.update_state(labels, predictions)
 
@@ -48,4 +48,4 @@ def accuracy_of_distributed_model(strategy, multi_worker_model, multi_worker_mod
     for inputs in distributed_test_dataset:
         strategy.run(test_step, args=(multi_worker_model_for_test, inputs))
 
-    return multi_worker_model_for_test.metrics[0].result()
+    return multi_worker_model_for_test.metrics[1].result()
