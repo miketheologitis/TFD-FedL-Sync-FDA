@@ -1,7 +1,7 @@
 import time
 import tensorflow as tf
 from fdavg.strategies.fda import fda_step_fn
-from fdavg.models.miscellaneous import trainable_vars_as_vector, update_distributed_model_vars_from_tensors
+from fdavg.models.miscellaneous import trainable_vars_as_vector, update_distributed_model_vars_from_tensors, update_model_vars
 from fdavg.utils.distributed_ops import aggregate_models
 from fdavg.metrics.metrics import EpochMetrics
 
@@ -43,6 +43,14 @@ def aggr_models(multi_worker_model):
         tf.distribute.ReduceOp.MEAN, multi_worker_model.trainable_variables
     )
 
+def aggr_models2(multi_worker_model):
+
+    synced_model_vars = tf.distribute.get_replica_context().all_reduce(
+        tf.distribute.ReduceOp.MEAN, multi_worker_model.trainable_variables
+    )
+
+    update_model_vars(multi_worker_model, synced_model_vars)
+
 
 def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
                         num_epochs, num_steps_per_epoch, theta, per_replica_batch_size):
@@ -75,8 +83,9 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
                 #TODO: synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
 
                 print("hi 1")
-                synced_model_vars = strategy.run(aggr_models, args=(multi_worker_model,))
-                tmp = trainable_vars_as_vector(synced_model_vars)
+                strategy.run(aggr_models2, args=(multi_worker_model,))
+
+                tmp = trainable_vars_as_vector(multi_worker_model.trainable_variables)
                 print(f"tmp: {tf.reduce_mean(tmp)}")
 
                 #tmp = trainable_vars_as_vector(synced_model_vars)
