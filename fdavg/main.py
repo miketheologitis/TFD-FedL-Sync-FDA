@@ -27,7 +27,7 @@ if __name__ == "__main__":
     if exper_info['task_index'] == 0:
         print(test_id)
 
-    # Run experiments
+    # Run experiment
     epoch_metrics = multi_worker_mirrored_train(exper_info)
 
     epoch_metrics_df = pd.DataFrame(process_epoch_metrics_with_test_id(epoch_metrics, test_id))
