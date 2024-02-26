@@ -76,9 +76,9 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
 
         # ---- METRICS ----
         epoch_duration_sec = time.time() - start_epoch_time
-        #acc = accuracy_of_distributed_model(
-        #    strategy, multi_worker_model, multi_worker_model_for_test, multi_worker_test_dataset
-        #)
+        acc = accuracy_of_distributed_model(
+            strategy, multi_worker_model, multi_worker_model_for_test, multi_worker_test_dataset
+        )
         e_met = EpochMetrics(epoch, num_total_rounds, num_total_steps, epoch_duration_sec, 1.)
         epoch_metrics.append(e_met)
         print(e_met)
