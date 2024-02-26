@@ -74,7 +74,9 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
                 # Synchronization needed - Round terminates
                 #TODO: synced_model_vars = aggregate_models(multi_worker_model.trainable_variables)
 
+                print("hi 1")
                 strategy.run(aggr_models, args=(multi_worker_model,))
+                print("hi 2")
 
                 #tmp = trainable_vars_as_vector(synced_model_vars)
                 #print(f"Sync: {num_total_rounds} here ----> {tf.reduce_mean(tmp)}")
