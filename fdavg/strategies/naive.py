@@ -49,7 +49,7 @@ def aggr_models2(multi_worker_model):
         tf.distribute.ReduceOp.MEAN, multi_worker_model.trainable_variables
     )
 
-    update_model_vars(multi_worker_model, synced_model_vars)
+    update_model_vars(multi_worker_model.trainable_variables, synced_model_vars)
 
 
 def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset,
