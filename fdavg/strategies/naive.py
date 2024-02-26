@@ -3,7 +3,7 @@ import tensorflow as tf
 from fdavg.strategies.fda import fda_step_fn
 from fdavg.models.miscellaneous import trainable_vars_as_vector
 from fdavg.metrics.metrics import EpochMetrics
-from fdavg.utils.distributed_ops import average_and_sync_model_trainable_variables, accuracy_of_distributed_model, acc_test
+from fdavg.utils.distributed_ops import average_and_sync_model_trainable_variables, accuracy_of_distributed_model
 
 
 def naive_var_approx(multi_worker_model, w_t0):
@@ -72,24 +72,15 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
                 w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
                 num_total_rounds += 1
 
-        # TODO: epoch ends, find accuracy
         epoch += 1
 
         # ---- METRICS ----
         epoch_duration_sec = time.time() - start_epoch_time
-        t1 = time.time()
         acc = accuracy_of_distributed_model(
             strategy, multi_worker_model, multi_worker_model_for_test, test_accuracy_metric, multi_worker_test_dataset
         )
-        t_good = time.time() - t1
-
         e_met = EpochMetrics(epoch, num_total_rounds, num_total_steps, epoch_duration_sec, acc)
         epoch_metrics.append(e_met)
-        print(e_met)
-        t2 = time.time()
-        test_acc = acc_test(strategy, multi_worker_model)
-        t_bad = time.time() - t2
-        print(f"Found this acc: {test_acc}   Bad: {t_bad}  Good: {t_good}")
         # ---- METRICS ----
 
     return epoch_metrics

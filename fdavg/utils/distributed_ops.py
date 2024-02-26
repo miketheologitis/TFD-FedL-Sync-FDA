@@ -52,7 +52,8 @@ def accuracy_of_distributed_model(strategy, multi_worker_model, multi_worker_mod
     return test_accuracy_metric.result().numpy()
 
 
-def acc_test(strategy, multi_worker_model):
+def acc_testing_purposes(strategy, multi_worker_model):
+    """ Do not use. Testing purposes """
     from fdavg.models.models import build_and_compile_advanced_cnn_for_mnist
     from fdavg.data.preprocessing import mnist_load_data
 
