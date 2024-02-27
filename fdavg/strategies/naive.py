@@ -60,7 +60,7 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
             # Train Step
             strategy.run(fda_step_fn, args=(next(iterator), multi_worker_model, per_replica_batch_size))
 
-            print(f"Step {num_epoch_steps}/{num_total_steps}.")
+            print(f"Step {num_epoch_steps}/{num_steps_per_epoch}.")
             num_epoch_steps += 1
             num_total_steps += 1
 
