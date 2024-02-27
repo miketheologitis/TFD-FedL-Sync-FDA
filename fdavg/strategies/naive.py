@@ -81,6 +81,7 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
         )
         e_met = EpochMetrics(epoch, num_total_rounds, num_total_steps, epoch_duration_sec, acc)
         epoch_metrics.append(e_met)
+        print(e_met)
         # ---- METRICS ----
 
     return epoch_metrics
