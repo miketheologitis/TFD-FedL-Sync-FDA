@@ -18,7 +18,6 @@ def naive_var_approx(multi_worker_model, w_t0):
     Args:
         multi_worker_model (tf.keras.Model): The distributed model being trained.
         w_t0 (tf.Tensor): The last round's model.
-        theta (float): The variance threshold.
 
     Returns:
         bool: A single boolean value, identical across all replicas, indicating whether round should terminate (True)
@@ -40,6 +39,8 @@ def naive_var_approx(multi_worker_model, w_t0):
 def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, multi_worker_model_for_test,
                         multi_worker_test_dataset, test_accuracy_metric, num_epochs, num_steps_per_epoch, theta,
                         per_replica_batch_size):
+
+    print("\n\n HELLO \n\n")
 
     epoch_metrics = []
 
