@@ -41,8 +41,6 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
                         multi_worker_test_dataset, test_accuracy_metric, num_epochs, num_steps_per_epoch, theta,
                         per_replica_batch_size):
 
-    print("Hi from `naive_training_loop`")
-
     epoch_metrics = []
 
     w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)  # tf.Tensor vector w/ shape=(d,)
@@ -54,13 +52,12 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
 
         iterator = iter(multi_worker_dataset)
         num_epoch_steps = 0
-        num_steps_per_epoch = 20  # DEL
+
         while num_epoch_steps <= num_steps_per_epoch:
 
             # Train Step
             strategy.run(fda_step_fn, args=(next(iterator), multi_worker_model, per_replica_batch_size))
 
-            print(f"Step {num_epoch_steps}/{num_steps_per_epoch}.")  # DEL
             num_epoch_steps += 1
             num_total_steps += 1
 
@@ -75,7 +72,6 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
 
                 w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
                 num_total_rounds += 1
-                print(f"Sync: {num_total_rounds}")  # DEL
 
         epoch += 1
 
