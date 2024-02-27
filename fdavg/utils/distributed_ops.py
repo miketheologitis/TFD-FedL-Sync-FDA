@@ -9,13 +9,6 @@ def average_model_trainable_variables(multi_worker_model):
     )
 
 
-def average_model_non_trainable_variables(multi_worker_model):
-
-    return tf.distribute.get_replica_context().all_reduce(
-        tf.distribute.ReduceOp.MEAN, multi_worker_model.non_trainable_variables
-    )
-
-
 def average_and_sync_model_trainable_variables(multi_worker_model):
 
     avg_train_model_vars = average_model_trainable_variables(multi_worker_model)
@@ -40,22 +33,15 @@ def accuracy_of_distributed_model(strategy, multi_worker_model, multi_worker_mod
     # Update testing model's trainable variables per-replica
     update_model_vars(multi_worker_model_for_test.trainable_variables, avg_train_model_vars)
 
-    print("Avg. train variables DONE.")  # DEL
-
+    # Non-Trainable variables are kept in-sync by tensorflow distributed behind the scenes.
     if multi_worker_model.non_trainable_variables:
-        print("Trying Avg. Non-trainable")  # DEL
-        avg_non_train_model_vars = strategy.run(average_model_non_trainable_variables, args=(multi_worker_model,))
-        print("Done Avg. Non-trainable")  # DEL
-        print("Trying Update Non-trainable")  # DEL
         # Update testing model's trainable non-variables per-replica
-        update_model_vars(multi_worker_model_for_test.non_trainable_variables, avg_non_train_model_vars)
-        print("Done Non-trainable")  # DEL
+        update_model_vars(
+            multi_worker_model_for_test.non_trainable_variables, multi_worker_model.non_trainable_variables
+        )
 
     for inputs in distributed_test_dataset:
-        print("Step in dist_test")  # DEL
         strategy.run(test_step, args=(multi_worker_model_for_test, inputs, test_accuracy_metric))
-
-    print("Done steps distr_test")  # DEL
 
     return test_accuracy_metric.result().numpy()
 

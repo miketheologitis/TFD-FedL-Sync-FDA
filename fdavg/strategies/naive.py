@@ -59,7 +59,8 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
             strategy.run(fda_step_fn, args=(next(iterator), multi_worker_model, per_replica_batch_size))
 
             tmp = trainable_vars_as_vector(multi_worker_model.non_trainable_variables)  # DEL
-            print(f"Step {num_epoch_steps}/{num_steps_per_epoch}. Non-Train: {tf.reduce_mean(tmp)}")  # DEL
+            print(f"Step {num_total_steps} tmp: {tf.reduce_mean(tmp)}")  # DEL
+
             num_epoch_steps += 1
             num_total_steps += 1
 
@@ -74,7 +75,6 @@ def naive_training_loop(strategy, multi_worker_model, multi_worker_dataset, mult
 
                 w_t0 = trainable_vars_as_vector(multi_worker_model.trainable_variables)
                 num_total_rounds += 1
-                print(f"Sync: {num_total_rounds}")  # DEL
 
         epoch += 1
 
