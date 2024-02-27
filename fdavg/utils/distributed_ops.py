@@ -40,14 +40,21 @@ def accuracy_of_distributed_model(strategy, multi_worker_model, multi_worker_mod
     # Update testing model's trainable variables per-replica
     update_model_vars(multi_worker_model_for_test.trainable_variables, avg_train_model_vars)
 
+    print("Avg. train variables DONE.")
+
     if multi_worker_model.non_trainable_variables:
+        print("Trying Non-trainable")
         avg_non_train_model_vars = strategy.run(average_model_non_trainable_variables, args=(multi_worker_model,))
 
         # Update testing model's trainable non-variables per-replica
         update_model_vars(multi_worker_model_for_test.non_trainable_variables, avg_non_train_model_vars)
+        print("Done Non-trainable")
 
     for inputs in distributed_test_dataset:
+        print("Step in dist_test")
         strategy.run(test_step, args=(multi_worker_model_for_test, inputs, test_accuracy_metric))
+
+    print("Done steps distr_test")
 
     return test_accuracy_metric.result().numpy()
 
