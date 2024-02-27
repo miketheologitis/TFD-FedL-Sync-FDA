@@ -68,8 +68,8 @@ def mnist_test_dataset_fn(global_batch_size, input_context):
 # CIFAR-10
 
 def load_cifar10_from_local_npz():
-    with np.load(cifar10_part1_data, allow_pickle=True) as data1:
-        with np.load(cifar10_part2_data, allow_pickle=True) as data2:
+    with np.load(cifar10_part1_data) as data1:
+        with np.load(cifar10_part2_data) as data2:
             X_train = np.concatenate((data1['X_train'], data2['X_train']))
             y_train = np.concatenate((data1['y_train'], data2['y_train']))
             X_test = np.concatenate((data1['X_test'], data2['X_test']))
@@ -85,12 +85,6 @@ def cifar10_load_data():
     X_test = preprocess_input(X_test)
 
     return X_train, y_train, X_test, y_test
-
-
-def cifar10_load_test_data():
-    _, _, X_test, y_test = cifar10_load_data()
-
-    return tf.data.Dataset.from_tensor_slices((X_test, y_test)).batch(256)
 
 
 def cifar10_worker_dataset(num_workers, i):
