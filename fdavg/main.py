@@ -25,7 +25,7 @@ if __name__ == "__main__":
     test_id = get_test_id(exper_info)
 
     if exper_info['task_index'] == 0:
-        print(test_id)
+        print(f"{test_id}\n")
 
     # Run experiment
     epoch_metrics = multi_worker_mirrored_train(exper_info)
@@ -36,5 +36,6 @@ if __name__ == "__main__":
         index=False
     )
 
-
+    if exper_info['task_index'] == 0:
+        print("\nFinished Experiment!\n")
 
