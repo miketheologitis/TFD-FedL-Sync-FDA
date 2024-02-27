@@ -11,6 +11,7 @@ TMP_DIR = '../metrics/tmp'
 EPOCH_METRICS_PATH = os.path.normpath(os.path.join(SCRIPT_DIR, f'{TMP_DIR}/epoch_metrics'))
 STEP_METRICS_PATH = os.path.normpath(os.path.join(SCRIPT_DIR, f'{TMP_DIR}/step_metrics'))
 
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
@@ -31,11 +32,13 @@ if __name__ == "__main__":
     epoch_metrics = multi_worker_mirrored_train(exper_info)
 
     epoch_metrics_df = pd.DataFrame(process_epoch_metrics_with_test_id(epoch_metrics, test_id))
-    epoch_metrics_df.to_csv(
-        f"{EPOCH_METRICS_PATH}/task{exper_info['task_index']}_{exper_info['exper_filename']}.csv",
-        index=False
-    )
 
     if exper_info['task_index'] == 0:
+
+        epoch_metrics_df.to_csv(
+            f"{EPOCH_METRICS_PATH}/{exper_info['exper_filename']}.csv",
+            index=False
+        )
+
         print("\nFinished Experiment!\n")
 
