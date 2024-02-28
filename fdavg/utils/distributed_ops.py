@@ -33,9 +33,9 @@ def accuracy_of_distributed_model(strategy, multi_worker_model, multi_worker_mod
     # Update testing model's trainable variables per-replica
     update_model_vars(multi_worker_model_for_test.trainable_variables, avg_train_model_vars)
 
-    # Non-Trainable variables are kept in-sync by tensorflow distributed behind the scenes. No all-reduce needed.
+    # Non-Trainable variables are kept in-sync by Tensorflow distributed behind the scenes. No all-reduce needed.
     if multi_worker_model.non_trainable_variables:
-        # Update testing model's trainable non-variables per-replica
+        # Update testing model's non-variables trainable per-replica
         update_model_vars(
             multi_worker_model_for_test.non_trainable_variables, multi_worker_model.non_trainable_variables
         )
