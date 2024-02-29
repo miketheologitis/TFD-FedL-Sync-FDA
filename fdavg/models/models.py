@@ -344,6 +344,7 @@ def build_and_compile_densenet_for_cifar10(name):
 
     densenet.compile(
         optimizer=tf.keras.optimizers.SGD(
+            learning_rate=0.1,
             momentum=0.9,
             nesterov=True
         ),
