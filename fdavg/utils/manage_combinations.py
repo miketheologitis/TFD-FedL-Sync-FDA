@@ -1,10 +1,12 @@
 import json
 import os
 from fdavg.models.models import (build_and_compile_densenet_for_cifar10, build_and_compile_lenet5_for_mnist,
-                                 build_and_compile_advanced_cnn_for_mnist)
+                                 build_and_compile_advanced_cnn_for_mnist,
+                                 build_and_compile_pretrained_convnext_for_cifar100)
 from functools import partial
 from fdavg.data.preprocessing import (mnist_dataset_fn, cifar10_dataset_fn, mnist_test_dataset_fn,
-                                      cifar10_test_dataset_fn, MNIST_N_TRAIN, CIFAR10_N_TRAIN)
+                                      cifar10_test_dataset_fn, MNIST_N_TRAIN, CIFAR10_N_TRAIN, cifar100_dataset_fn,
+                                      cifar100_test_dataset_fn, CIFAR100_N_TRAIN)
 from fdavg.metrics.metrics import TestId
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +50,19 @@ def derive_extra_params(exper_info):
         # Assumed NN is a DenseNet
         exper_info['build_and_compile_model_fn'] = partial(
             build_and_compile_densenet_for_cifar10,
+            exper_info["nn_name"]
+        )
+
+    if exper_info["ds_name"] == "CIFAR100":
+        exper_info["num_steps_per_epoch"] = (CIFAR100_N_TRAIN // exper_info['num_workers'] //
+                                             exper_info['per_worker_batch_size'])
+
+        exper_info['dataset_fn'] = cifar100_dataset_fn
+        exper_info['test_dataset_fn'] = cifar100_test_dataset_fn
+
+        # Assumed NN is a DenseNet
+        exper_info['build_and_compile_model_fn'] = partial(
+            build_and_compile_pretrained_convnext_for_cifar100,
             exper_info["nn_name"]
         )
 

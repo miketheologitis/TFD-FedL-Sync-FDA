@@ -1,5 +1,23 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from tensorflow.keras.applications import ConvNeXtLarge, ConvNeXtXLarge
+
+import os
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
+convenet_dir = 'convnext_cifar100_imagenet/'
+
+ConvNeXtLarge_weight_file = os.path.normpath(
+    os.path.join(
+        script_dir, f'{convenet_dir}/ConvNeXtLarge.05_acc_0.64_val_acc_0.62.weights.h5'
+    )
+)
+
+ConvNeXtXLarge_weight_file = os.path.normpath(
+    os.path.join(
+        script_dir, f'{convenet_dir}/ConvNeXtXLarge.05_acc_0.64_val_acc_0.63.weights.h5'
+    )
+)
 
 
 def sequential_lenet5(cnn_input_reshape=(28, 28, 1), num_classes=10):
@@ -305,6 +323,55 @@ def get_densenet(name, input_shape=(32, 32, 3), classes=10):
     if name == 'DenseNet201':
         model = dense_net_fn([6, 12, 48, 32], input_shape, classes)
     return model
+
+
+""" ConvNeXt """
+
+
+def get_convnext(name, input_shape=(32, 32, 3), classes=100):
+    base_model, weight_file = None, None
+
+    if name == 'ConvNeXtLarge':
+        base_model = ConvNeXtLarge(include_top=False, weights='imagenet', input_shape=input_shape)
+        weight_file = ConvNeXtLarge_weight_file
+
+    if name == 'ConvNeXtXLarge':
+        base_model = ConvNeXtXLarge(include_top=False, weights='imagenet', input_shape=input_shape)
+        weight_file = ConvNeXtXLarge_weight_file
+
+    base_model.trainable = True
+
+    inputs = tf.keras.Input(shape=input_shape)
+
+    # The base model contains batchnorm layers. We want to keep them in inference mode
+    # See https://keras.io/guides/transfer_learning/
+    x = base_model(inputs, training=False)
+    x = layers.GlobalAveragePooling2D()(x)
+    x = layers.Dense(512, activation='relu')(x)
+    x = layers.Dropout(0.5)(x)
+    outputs = layers.Dense(classes, activation='softmax')(x)
+
+    model = models.Model(inputs=inputs, outputs=outputs)
+
+    model.load_weights(weight_file)
+
+    return model
+
+
+def build_and_compile_pretrained_convnext_for_cifar100(name):
+    convnet = get_convnext(name)
+
+    convnet.compile(
+        optimizer=tf.keras.optimizers.AdamW(learning_rate=5e-5, weight_decay=1e-8),
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(
+            reduction=tf.keras.losses.Reduction.NONE
+        ),  # we have softmax
+        metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name='accuracy')]
+    )
+
+    convnet.build((None, 32, 32, 3))
+
+    return convnet
 
 
 def build_and_compile_advanced_cnn_for_mnist():
