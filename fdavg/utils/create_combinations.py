@@ -70,8 +70,8 @@ def create_combinations(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--comb_file_id', type=int, help="The combinations prefix, i.e., <PREFIX>.json", required=True)
-    parser.add_argument('--ds_name', nargs='+', type=str, help="The dataset name.", default=["MNIST"])
+    parser.add_argument('--comb_file_id', type=int, help="The combinations prefix, i.e., <PREFIX>.json. Ex. 0", required=True)
+    parser.add_argument('--ds_name', nargs='+', type=str, help="The dataset name. Options: 'MNIST', 'CIFAR10', 'CIFAR100'. Ex. MNIST", default=["MNIST"])
     parser.add_argument('--b', nargs='+', type=int, help="The batch size(s).")
     parser.add_argument('--e', type=int, help="Number of epochs.", required=True)
     parser.add_argument('--strat_name', nargs='+', type=str, help="The Strat name(s).", required=True)

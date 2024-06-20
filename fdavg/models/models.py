@@ -5,7 +5,7 @@ from tensorflow.keras.applications import ConvNeXtLarge, ConvNeXtXLarge
 import os
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-convenet_dir = 'convnext_cifar100_imagenet/'
+convenet_dir = 'cifar100_imagenet/'
 
 ConvNeXtLarge_weight_file = os.path.normpath(
     os.path.join(
